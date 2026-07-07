@@ -1,0 +1,1 @@
+--out-path "D:/Work/Graphics/Volume Rendering/Tests/NeuVolEvalCUDA-v2/build/src/display/gladsources/glad" --api gl:core=4.3 --reproducible c 

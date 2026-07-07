@@ -1,0 +1,32 @@
+{
+    "albedo": [
+        1.0,
+        1.0,
+        1.0
+    ],
+    "cameraPos": [
+        0.008204485289752483,
+        0.20315837860107422,
+        0.8702454566955566
+    ],
+    "compatibility": 1,
+    "denoise": 2,
+    "densityInterpolation": 1,
+    "enableSkybox": false,
+    "excludeLightEncoding": true,
+    "g": 0.5230000019073486,
+    "lightColor": [
+        1.0,
+        1.0,
+        1.0
+    ],
+    "lightDir": [
+        0.24026307463645935,
+        0.909382164478302,
+        0.33955520391464233
+    ],
+    "skyboxSampleLevel": 0.0,
+    "toneMapping": 1,
+    "trMapMarchingSteps": 0,
+    "trMapSampleLevel": 1
+}

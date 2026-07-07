@@ -1,0 +1,107 @@
+static constexpr uint32_t FEATURE_DIM = {FEATURE_DIM};
+static constexpr uint32_t SPLIT_OFFSET = {SPLIT_OFFSET};
+static constexpr uint32_t ALBEDO_DIM = {ALBEDO_DIM};
+static constexpr uint32_t INPUT_DIM = {INPUT_DIM};
+static constexpr uint32_t EXTRA_DIM = {EXTRA_DIM};
+
+static constexpr uint32_t SPLIT_END = SPLIT_OFFSET + ALBEDO_DIM * 3;
+static constexpr uint32_t NETWORK_NUM = {NETWORK_NUM};
+using InputVec = tcnn::hvec<INPUT_DIM + EXTRA_DIM>;
+
+{PREPARE_LAYER_INFERENCE}
+
+__device__ void Inference(const half* __restrict__ srcBegin,
+                          const __half* __restrict__ params,
+                          InputVec& input, InputVec (&output)[3],
+                          const int (&albedoMap)[3])
+{{
+    InputVec buffer;
+
+    TCNN_PRAGMA_UNROLL
+    for (int i = 0; i < EXTRA_DIM; i++)
+        buffer[i + INPUT_DIM] = 1.0f; // Padded input.
+
+    TCNN_PRAGMA_UNROLL
+    for (int i = 0; i < SPLIT_OFFSET; i++)
+        input[i] = srcBegin[i];
+    TCNN_PRAGMA_UNROLL
+    for (int i = SPLIT_END; i < FEATURE_DIM; i++)
+        input[i - 2 * ALBEDO_DIM] = srcBegin[i];
+
+    TCNN_PRAGMA_UNROLL
+    for (int channel = 0; channel < 3; channel++)
+    {{
+        if (albedoMap[channel] != channel)
+            continue;
+
+        TCNN_PRAGMA_UNROLL
+        for (int i = 0; i < ALBEDO_DIM; i++)
+            input[SPLIT_OFFSET + i] = srcBegin[SPLIT_OFFSET + ALBEDO_DIM * channel + i];
+        TCNN_PRAGMA_UNROLL
+        for (int i = 0; i < INPUT_DIM; i++)
+            buffer[i] = output[channel][i] + input[i];
+
+        output[channel] = PrepareLayerInference(buffer, params);
+
+        TCNN_PRAGMA_UNROLL
+        for (int i = 0; i < INPUT_DIM; i++)
+            output[channel][i] = __hmin(__hmax(output[channel][i], half(0.0f)), 
+                                        half(6.0f)) + buffer[i];
+    }}
+}}
+
+{FINAL_LAYER_INFERENCE}
+
+__global__ void RadianceInference(const half* __restrict__ featureBuffer,
+                                  half* __restrict__ radianceBuffer, 
+                                  const float* __restrict__ positionBuffer,
+                                  std::size_t size, uint32_t albedoSkipHint,
+                                  tcnn::vec3 scale, const half** params)
+{{
+    auto idx = threadIdx.x + blockDim.x * blockIdx.x;
+    if (idx >= size) // guaranteed consistency for a warp.
+        return;
+
+    // Remove comment below when position buffer can be absent.
+    bool notHit = /* positionBuffer != nullptr && */ positionBuffer[idx * 4 + 3] < 0;
+    unsigned int mask = 0xFFFFFFFF; // Full warp mask
+    bool allNotHit = __all_sync(mask, notHit);
+    if (allNotHit)
+        return;
+
+    int albedoMap[3] = {{ 0, albedoSkipHint & 0xFF, (albedoSkipHint >> 8) & 0xFF }};
+    // int albedoMap[3] = {{ 0, 1, 2 }};
+
+    auto srcBegin = featureBuffer + idx * FEATURE_DIM * NETWORK_NUM;
+    auto dstBegin = radianceBuffer + idx * 3;
+
+    InputVec input, output[3]{{
+        InputVec::zero(), InputVec::zero(), InputVec::zero()
+    }};
+
+    TCNN_PRAGMA_UNROLL
+    for (int i = 0; i < NETWORK_NUM; i++)
+        Inference(srcBegin + i * FEATURE_DIM, params[i], input, output, albedoMap);
+
+    tcnn::hvec<3> result;
+    // Then final layer.
+    TCNN_PRAGMA_UNROLL
+    for (int channel = 0; channel < 3; channel++)
+    {{
+        TCNN_PRAGMA_UNROLL
+        for (int i = 0; i < EXTRA_DIM; i++)
+            output[channel][i + INPUT_DIM] = 1.0f;
+
+        if (albedoMap[channel] == channel)
+        {{
+            result[channel] = FinalLayerInference(output[channel], params[NETWORK_NUM])[0];
+        }}
+        else
+        {{
+            result[channel] = result[albedoMap[channel]];
+        }}
+        dstBegin[channel] += (exp(abs((float)result[channel])) - 1.0f) * scale[channel];
+    }}
+
+    return;
+}}

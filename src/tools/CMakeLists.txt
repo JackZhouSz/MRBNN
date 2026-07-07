@@ -1,0 +1,5 @@
+add_executable(ViewAdjustment ViewAdjustment.cpp)
+target_link_libraries(ViewAdjustment PRIVATE nlohmann_json::nlohmann_json)
+
+add_executable(VisualGradient VisualGradient.cu)
+target_link_libraries(VisualGradient PRIVATE RenderLib)
