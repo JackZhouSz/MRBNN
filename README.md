@@ -47,7 +47,7 @@ Note: We don't strictly manage encoding of all file paths, so it's recommended t
 We provide three sample baking data in `data/` to cover typical cases in our paper.
 
 1. Cloud1: a normal volume. **Particularly, you need to download the volume [data sample](https://1drv.ms/f/c/c6d71596bc679f33/QjOfZ7yWFdcggMZJBAAAAAAATuOe1hNOeD_D7Q) provided by MRPNN and save it as `data/volumes/CLOUD1.bin`** and it needs 4GB. Also, we upload the 3D view encoding mentioned in our supplementary.
-2. Bunny-albedo: a volume that supports albedo grid.
+2. Bunny-albedo: a volume that supports albedo grid. Unzip the `data/volumes/albedo_render.zip` and move `albedo_render.bin` to `data/volumes`.
 3. Cloud-03: a normal volume with baking of ambient light.
 
 ### Folder selection
