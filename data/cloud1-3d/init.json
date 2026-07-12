@@ -1,0 +1,30 @@
+{
+    "albedo": [
+        0.9200000166893005,
+        0.9350000023841858,
+        0.9990009665489197
+    ],
+    "cameraPos": [
+        0.6603012681007385,
+        0.09282273054122925,
+        -0.0960940271615982
+    ],
+    "compatibility": 1,
+    "denoise": 2,
+    "densityInterpolation": 1,
+    "excludeLightEncoding": true,
+    "g": 0.8600000143051147,
+    "lightColor": [
+        1.0,
+        1.0,
+        1.0
+    ],
+    "lightDir": [
+        0.09123804420232773,
+        0.9155190587043762,
+        -0.39179137349128723
+    ],
+    "toneMapping": 2,
+    "trMapMarchingSteps": 0,
+    "trMapSampleLevel": 3
+}

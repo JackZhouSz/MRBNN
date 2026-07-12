@@ -32,7 +32,7 @@ Also, though all dependency libraries are cross-platform (except that GUI to ope
 
 ### Build
 
-You can open the folder with your IDE to do automatic configuration and build. If you want to do so manually, run commands below:
+You can open the folder with your IDE to do automatic configuration and build (**in Release mode** to get fully optimized executable). If you want to do so manually, run commands below:
 ```bash
 mkdir build
 # Configure the project.
@@ -81,7 +81,7 @@ Coming soon...
 1. Light scale: If you use a standard PT renderer with our parameters, you may find that it's obviously darker. The reason is that MRPNN scales all its lighting by $\pi$ and we align with its behavior to compare conveniently.
 2. Redundant baking data: We store some separate MLP data like `mlp0.weight0.bin`, but they're already deprecated and not used anymore; only TCNN ones are currently used. Nevertheless, these deprecated data are required to pass some legacy code in the repo.
 3. Possible ICE: For C++/CUDA compiler bugs that cause internal compiler error (ICE), we note that:
-   + To successfully build ExternalTCNN for the first time, you may need to build it twice since we find that it occasionally encounters wrong compiler flags and ICE. But this seems to only happen for the first time.
+   + To successfully build ExternalTCNN for the first time, you may need to build it twice since we find that it occasionally encounters wrong compiler flags and ICE. If corrupted link files are reported, you can either find and delete it or clean and rebuild. But this seems to only happen for the first time.
    + We have to use C++17 instead of C++20 canonically for tcnn-related code, otherwise ICE occurs in tcnn headers. We also notice possible ABI incompatibility since tcnn library is compiled with `-std=c++14`, but practically it's okay for kindness of vendors. Nevertheless, we isolate them as shared library to minimize such reliance.
 4. For running some targets except for `main` in Windows, you may need to copy ExternalTCNN.dll to the executable directory though they don't really use TCNN, since shared libraries are eagerly loaded when specified in CMake.
 5. GLAD2: We include glad2 in our repository directly but you can also generate it yourself and see `src/display/CMakeLists.txt` for details. The reason we include it directly is that some users may be unable to configure it properly.
