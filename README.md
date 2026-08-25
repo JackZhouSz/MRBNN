@@ -3,8 +3,9 @@
   <a href="https://extra-creativity.github.io/projects/MRBNN"><b>🔗Project Page</b></a> |
   <a href="https://extra-creativity.github.io/assets/pdf/MRBNN/paper.pdf"><b>📄 Paper </b></a> |
   <a href="https://extra-creativity.github.io/assets/pdf/MRBNN/supplementary.pdf"><b>📄 Supplementary </b></a>
+  <br/>
+  And see presentation materials in our project page!
 </p>
-
 
 ![](./assets/teaser.jpg)
 
